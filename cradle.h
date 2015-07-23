@@ -14,6 +14,8 @@ char getCurrChar();
 
 char getNextChar();
 
+char getPrevChar();
+
 int isAlpha(char alpha);
 
 int isDigit(char digit);

@@ -7,13 +7,12 @@ void factor();
 void term();
 void regex();
 
-void chars(int mustMatch)
+void chars()
 {
     /* This must parse at least minMatch characters or matchable
      * sub expression, prints an error and exits if not
      */
 
-    int charCount = 0;
     while(isAlpha(getCurrChar()) || getCurrChar() == '\\')
     {
         if(getCurrChar() == '\\')
@@ -21,22 +20,19 @@ void chars(int mustMatch)
             getNextChar();
             //handle escaped char
             getNextChar();
-            charCount++;
             continue;
         }
-        else if(isAlpha(getCurrChar()))
+        else if(isAlpha(getCurrChar()) || isDigit(getCurrChar()))
         {
             //handle normal char
             getNextChar();
-            charCount++;
         }
     }
-    if(charCount < mustMatch)
-        parseError("\n Invalid operator or expression expected");
 }
 
-void factor(int mustMatch)
+void factor()
 {
+    chars(); //eats all characters
     if(getCurrChar() == '(')
     {
         getNextChar();
@@ -44,33 +40,35 @@ void factor(int mustMatch)
         if(getCurrChar() == ')')
         {
             getNextChar();
+            getNextChar();
         }
         else
             parseError("\n Unbalanced parantheses");
     }
-    chars(mustMatch); //eats all characters
 }
 
 void term()
 {
-    factor(1);
+    factor();
     if(getCurrChar() == '*')
     {
-        if(isRepOp(getNextChar()))
-            parseError("\n Invalid repetition operator");
+        if(!isAlpha(getPrevChar()) && !isDigit(getPrevChar()) &&
+           (getPrevChar() != ')'))
+            parseError("\n Expression must precede repetition operator ");
+
         if(getCurrChar() == '?') //makes rep ops ungreedy
             getNextChar();
         /*
          * Do something
          */
     }
-    factor(0);
+    factor();
 }
 
 void regex()
 {
     term();
-    if(getCurrChar() == '|')
+    if(getCurrChar() == '|') //TODO check sub expression is not empty
     {
         getNextChar();
         regex();

@@ -27,11 +27,8 @@ char *getChars(int argc, char **argv)
 }
 char getPrevChar()
 {
-    look--;
-    if(look != NULL)
-    {
-        return *look;
-    }
+    if(look - 1 != NULL)
+        return *(look - 1);
     return 0;
 }
 
@@ -72,7 +69,9 @@ int isAlpha(char alpha)
 
 int isDigit(char digit)
 {
-    return 1;
+    if(digit > 0x2F && digit < 0x3A)
+        return 1;
+    return 0;
 }
 
 int isUpperCase(char alpha)
@@ -101,6 +100,7 @@ void parseError(char *s)
 {
     printf("%s\n",s);
     printf(" Curr char is %c %d \n", getCurrChar(),getCurrChar());
+    printf(" Prev char is %c %d \n", getPrevChar(),getPrevChar());
     printf(" Next char is %c %d \n", getNextChar(),getCurrChar());
 
     exit(1);
