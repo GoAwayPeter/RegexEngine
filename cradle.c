@@ -20,6 +20,7 @@ char *getChars(int argc, char **argv)
 //        file = argv[2];
 
         look = regexData;
+        lookBegin = look;
     }
     else
         return NULL;
@@ -27,7 +28,7 @@ char *getChars(int argc, char **argv)
 }
 char getPrevChar()
 {
-    if(look - 1 != NULL)
+    if(look - 1 != NULL && look - 1 >= lookBegin)
         return *(look - 1);
     return 0;
 }

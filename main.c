@@ -40,7 +40,7 @@ void factor()
         if(getCurrChar() == ')')
         {
             getNextChar();
-            getNextChar();
+            term();
         }
         else
             parseError("\n Unbalanced parantheses");
@@ -55,23 +55,30 @@ void term()
         if(!isAlpha(getPrevChar()) && !isDigit(getPrevChar()) &&
            (getPrevChar() != ')'))
             parseError("\n Expression must precede repetition operator ");
+        else
+            getNextChar();
 
         if(getCurrChar() == '?') //makes rep ops ungreedy
             getNextChar();
+        term();
         /*
          * Do something
          */
     }
-    factor();
 }
 
 void regex()
 {
     term();
-    if(getCurrChar() == '|') //TODO check sub expression is not empty
+    if(getCurrChar() == '|') 
     {
+        if(!getPrevChar())
+            parseError(" \n Empty subexpression is not legal \n");
         getNextChar();
         regex();
+
+        if(getPrevChar() == 0 || getPrevChar() == '|')
+            parseError(" \n Empty subexpression is not legal \n");
     }
 }
 

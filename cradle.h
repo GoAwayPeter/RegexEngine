@@ -5,6 +5,7 @@
  * Global data;
  */
 char *look;
+char static *lookBegin;
 char *regexData;
 char *file;
 
