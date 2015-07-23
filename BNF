@@ -1,0 +1,28 @@
+
+//Not correct
+<regex>     ::= <term> '|' <regex> | <term>
+<term>      ::= <subexpr> | '^' <subexpr> | <subexpr> '$' | '(' <subexpr> ') |
+                '\b'<subexpr> | <subexpr> '\b' | <subexpr><term>
+<subexpr>   ::= <chars><repop> | <brackexpr> | <chars>
+<repop>     ::= '?' | '+' | '*' | '{' <num> ',' <num> '}' | '{' <num> ',' '}' | '{' ',' <num> '}' 
+<brackexpr> ::= '[' <rangeexpr> ']' | '[^' <rangeexpr> ']'
+<rangeexpr> ::= 
+
+
+    /*
+     * Simple grammar for regex in BNF form, TODO expand
+     *
+     *
+     */
+
+<regex>     ::= <term> '|' <regex> | <term>
+<term>      ::= <factor><term> | <factor> '*' | <factor>
+<factor>    ::= '(' <regex> ')' | <chars>
+<chars>     ::= <chars><char> | '\'<chars><char> | <char>
+<char>      ::= 'a' | 'b' | 'c' | 'd' | ...
+
+
+
+
+
+
