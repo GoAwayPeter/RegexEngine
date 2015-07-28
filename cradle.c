@@ -4,7 +4,7 @@
 
 char *getChars(int argc, char **argv)
 {
-    if(argc > 0)
+    if(argc > 1)
     {
         regexData = (char *)malloc(100 * sizeof(char));
 

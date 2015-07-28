@@ -1,18 +1,21 @@
 #include <stdio.h>
 #include <time.h>
 #include "cradle.h"
+#include "automata.h"
 
 void chars();
 void factor();
 void term();
 void regex();
 
+/* 
+ * Recursive descent parser to parse regex expressions,
+ * uses syntax directed translation (I think) to translate
+ * the regex to an NFA, and then hopefully I'll figure out
+ * how to convert the NFA to a DFA and yayyy it'll all work wonderfully
+ */
 void chars()
 {
-    /* This must parse at least minMatch characters or matchable
-     * sub expression, prints an error and exits if not
-     */
-
     while(isAlpha(getCurrChar()) || getCurrChar() == '\\')
     {
         if(getCurrChar() == '\\')
@@ -22,7 +25,7 @@ void chars()
             getNextChar();
             continue;
         }
-        else if(isAlpha(getCurrChar()) || isDigit(getCurrChar()))
+        else if(!isRepOp(getCurrChar()))
         {
             //handle normal char
             getNextChar();
@@ -82,33 +85,38 @@ void regex()
     }
 }
 
-
 int main(int argc, char **argv)
 {
     int i;
     clock_t begin, end;
     double timeTaken;
 
-    if(getChars(argc,argv) == NULL)
-        printf("Not enough arguments given\n");
-    begin = clock();
-    regex();
-
-    if(getCurrChar() == '\0')
-        printf("\nSuccesfully parsed!");
-    else
+    if(getChars(argc,argv) != NULL)
     {
-        printf("\nError, chars remaining: %c",getCurrChar());
-        while(getCurrChar() != '\0')
-        {
-            getNextChar();
-        }
-    }
-    end = clock();
-    timeTaken = (double)(end - begin)/CLOCKS_PER_SEC * 1000;
+        begin = clock();
+        regex();
 
-    printf("\n Regex parsed in %f ms",timeTaken);
-    printf("\n");
+        if(getCurrChar() == '\0')
+            printf("\nSuccesfully parsed!");
+        else
+        {
+            printf("\nError, chars remaining: %c",getCurrChar());
+            while(getCurrChar() != '\0')
+            {
+                getNextChar();
+            }
+        }
+        end = clock();
+        timeTaken = (double)(end - begin)/CLOCKS_PER_SEC * 1000;
+
+        printf("\n Regex parsed in %f ms",timeTaken);
+        printf("\n");
+    }
+    else 
+        printf("Not enough arguments given\n");
+
+    initStates();
+//    printStateTable();
 
     return 0;
 }
