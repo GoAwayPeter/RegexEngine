@@ -29,5 +29,7 @@ int isRepOp(char op);
 
 void parseError(char *s);
 
+void memoryError(char *s);
+
 #endif
 

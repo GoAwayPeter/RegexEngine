@@ -1,5 +1,5 @@
-CC=gcc
-CFLAGS= -g
+CC=clang
+CFLAGS= -g -O0
 LDFLAGS= 
 SOURCES= main.c cradle.c automata.c
 OBJECTS= $(SOURCES:.c=.o)

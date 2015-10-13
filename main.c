@@ -8,12 +8,13 @@ void factor();
 void term();
 void regex();
 
+static state currNFAState;
 /* 
  * Recursive descent parser to parse regex expressions,
- * uses syntax directed translation (I think) to translate
+ * uses syntax directed translation to translate
  * the regex to an NFA, and then hopefully I'll figure out
- * how to convert the NFA to a DFA and yayyy it'll all work wonderfully
- */
+ * how to convert the NFA to a DFA
+ * */
 void chars()
 {
     while(isAlpha(getCurrChar()) || getCurrChar() == '\\')
@@ -28,8 +29,14 @@ void chars()
         else if(!isRepOp(getCurrChar()))
         {
             //handle normal char
+            if(setNFAStateRelation(getCurrChar(),currNFAState,currNFAState + 1) == -1)
+                printf(" Error setting NFA state, currNFAState is %ld \n",currNFAState);
+
+            currNFAState += 2; //now points to next free nfa state
             getNextChar();
         }
+        else
+            parseError("\n Expected char");
     }
 }
 
@@ -75,6 +82,8 @@ void regex()
     term();
     if(getCurrChar() == '|') 
     {
+        /* This check quite possibly needs removing
+         */
         if(!getPrevChar())
             parseError(" \n Empty subexpression is not legal \n");
         getNextChar();
@@ -90,6 +99,8 @@ int main(int argc, char **argv)
     int i;
     clock_t begin, end;
     double timeTaken;
+    currNFAState = 0;
+    initNFAStates();
 
     if(getChars(argc,argv) != NULL)
     {
@@ -109,14 +120,12 @@ int main(int argc, char **argv)
         end = clock();
         timeTaken = (double)(end - begin)/CLOCKS_PER_SEC * 1000;
 
-        printf("\n Regex parsed in %f ms",timeTaken);
-        printf("\n");
+        printNFAStateTable();
+
+        printf("\n Regex parsed in %f ms\n",timeTaken);
     }
     else 
         printf("Not enough arguments given\n");
-
-    initStates();
-//    printStateTable();
 
     return 0;
 }

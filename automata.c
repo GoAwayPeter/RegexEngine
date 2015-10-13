@@ -2,40 +2,74 @@
 #include <stdio.h>
 #include "automata.h"
 
-static state **symbols;
-static int numRows;
+static states **symbols;
+static long int numStates;
 
-void initStates()
+void initNFAStates()
 {
+    /* NFA state table is a 2D array of unsigned long (states) types, 
+     * where each unsigned long is 8 bytes, and each byte of the 
+     * long is used as a number in its own right, representing
+     * a state change. This removes the need for a 3D array, which 
+     * would be incredibly messy and horrible. Ew.
+     * 
+     */
     int i,j;
-    symbols = (state**)malloc(200 * sizeof(char));
-    for(i = 0;i < 200;i++)
+    numStates = 256;
+    symbols = malloc(numStates * sizeof(*symbols));
+    for(i = 0;i < numStates;i++)
     {
-        symbols[i] = (state*)malloc(NUMSYMBOLS * sizeof(state));
-        for(j = 0;j < 128;j++)
-            symbols[i][j] = 0;
+        symbols[i] = malloc(NUMSYMBOLS * sizeof(states));
+        for(j = 0;j < NUMSYMBOLS;j++)
+            symbols[i][j] = EPSILON;
     }
 }
 
-void printStateTable()
+void freeNFAStates()
 {
-    int i, j; 
-    for(i = 0;i < 200;i++)
+    int i,j;
+    for(i = 0;i < numStates;i++)
     {
+        free(symbols[i]);
+    }
+}
+
+void printNFAStateTable()
+{
+    printf("\n");
+    int i, j; 
+    for(i = 0;i < numStates;i++)
+    {
+        printf("%d \t",i);
         for(j = 0;j < NUMSYMBOLS;j++)
+        {
             printf("%ld",symbols[i][j]);
+        }
         printf("\n");
     }
 }
 
-state getStateRelation(state toGet, char ch)
+state getNFAStateRelation(states toGet, char ch)
 {
-    //TODO 
+    /*
+     * TODO
+     * THIS IS JUST PLACEHOLDER CODE
+     */
     return symbols[(int)toGet][(int)ch];
 }
 
-state setState(state toGet, char ch, state input)
+state setNFAStateRelation(char ch, states from, states to)
 {
-    symbols[(int)toGet][(int)ch] = input;
-    return input;
+    if(from >= 0 && from < numStates &&
+        to >= 0 && to < numStates)
+    {
+        symbols[from][ch] = to;
+
+        return to;
+    }
+    else
+    {
+        printf(" %ld %ld \n",from,to);
+        return -1;
+    }
 }

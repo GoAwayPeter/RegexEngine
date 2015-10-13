@@ -99,10 +99,17 @@ int isRepOp(char op)
 
 void parseError(char *s)
 {
-    printf("%s\n",s);
+    printf("Parse Error: %s\n",s);
     printf(" Curr char is %c %d \n", getCurrChar(),getCurrChar());
     printf(" Prev char is %c %d \n", getPrevChar(),getPrevChar());
     printf(" Next char is %c %d \n", getNextChar(),getCurrChar());
+
+    exit(1);
+}
+
+void memoryError(char *s)
+{
+    printf("Memory Error: %s\n",s);
 
     exit(1);
 }
