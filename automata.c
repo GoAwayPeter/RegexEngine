@@ -10,9 +10,7 @@
 */
 
 State* initNFAStates(int numStates)
-{
-
-    int i,j;
+{   int i,j;
     numStates = 256;
     State *this, *prev, *start;
     for(i = 0;i < numStates;i++)
