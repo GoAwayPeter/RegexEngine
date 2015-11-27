@@ -2,74 +2,72 @@
 #include <stdio.h>
 #include "automata.h"
 
-static states **symbols;
-static long int numStates;
+/*
+* State table is a linked list of arrays of linked
+* lists.
+* This removes the need for a 3D array, which 
+* would be incredibly messy and horrible. Ew.
+*/
 
-void initNFAStates()
+State* initNFAStates(int numStates)
 {
-    /* NFA state table is a 2D array of unsigned long (states) types, 
-     * where each unsigned long is 8 bytes, and each byte of the 
-     * long is used as a number in its own right, representing
-     * a state change. This removes the need for a 3D array, which 
-     * would be incredibly messy and horrible. Ew.
-     * 
-     */
+
     int i,j;
     numStates = 256;
-    symbols = malloc(numStates * sizeof(*symbols));
+    State *this, *prev, *start;
     for(i = 0;i < numStates;i++)
     {
-        symbols[i] = malloc(NUMSYMBOLS * sizeof(states));
-        for(j = 0;j < NUMSYMBOLS;j++)
-            symbols[i][j] = EPSILON;
+        this = malloc(sizeof(State));    
+        if(i == 0)
+            start = this;
+        this->prev = prev;
+        if(prev != (State*)NULL)
+            prev->next = this;
+        this->symbolArray = malloc(NUMSYMBOLS * sizeof(Symbol));
+        prev = this;
     }
+    return start;
+}
+
+State* addNFAStates(State toAdd)
+{
+    State a;
+    return &a;
+}
+
+State* nextState(State* s)
+{
+    if(s != NULL)
+        return s->next;
+    printf("Error, null pointer given during state change\n");
+    return (State*)-1;
+}
+
+State* prevState(State* s)
+{
+    if(s != NULL)
+        return s->prev;
+    printf("Error, null pointer given during state change\n");
+    return (State*)-1;
 }
 
 void freeNFAStates()
 {
     int i,j;
-    for(i = 0;i < numStates;i++)
-    {
-        free(symbols[i]);
-    }
 }
 
 void printNFAStateTable()
 {
-    printf("\n");
-    int i, j; 
-    for(i = 0;i < numStates;i++)
-    {
-        printf("%d \t",i);
-        for(j = 0;j < NUMSYMBOLS;j++)
-        {
-            printf("%ld",symbols[i][j]);
-        }
-        printf("\n");
-    }
 }
 
-state getNFAStateRelation(states toGet, char ch)
+State* getNFAStateRelation(State* toGet, char symbol)
 {
-    /*
-     * TODO
-     * THIS IS JUST PLACEHOLDER CODE
-     */
-    return symbols[(int)toGet][(int)ch];
+    State a;
+    return &a;
 }
 
-state setNFAStateRelation(char ch, states from, states to)
+State* setNFAStateRelation(char symbol, State* from, State* to)
 {
-    if(from >= 0 && from < numStates &&
-        to >= 0 && to < numStates)
-    {
-        symbols[from][ch] = to;
-
-        return to;
-    }
-    else
-    {
-        printf(" %ld %ld \n",from,to);
-        return -1;
-    }
+    State a;
+    return &a;
 }

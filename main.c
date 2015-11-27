@@ -8,7 +8,7 @@ void factor();
 void term();
 void regex();
 
-static state currNFAState;
+static State* currNFAState;
 /* 
  * Recursive descent parser to parse regex expressions,
  * uses syntax directed translation to translate
@@ -29,10 +29,10 @@ void chars()
         else if(!isRepOp(getCurrChar()))
         {
             //handle normal char
-            if(setNFAStateRelation(getCurrChar(),currNFAState,currNFAState + 1) == -1)
+            if(setNFAStateRelation(getCurrChar(),currNFAState,nextState(currNFAState)) == -1)
                 printf(" Error setting NFA state, currNFAState is %ld \n",currNFAState);
 
-            currNFAState += 2; //now points to next free nfa state
+            currNFAState = nextState(nextState(currNFAState));
             getNextChar();
         }
         else
