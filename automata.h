@@ -5,28 +5,36 @@
 #define EPSILON 0
 #define NOMOVE //TODO
 
-typedef struct State {
-    struct State* symbolArray;
+/* 
+ * Position in symbolArray is Symbol value
+ */
+struct State;
+
+typedef struct Symbol{
+    struct State* change;
+    struct Symbol* next;
+} Symbol;
+
+typedef struct SymList{
+    char val;
+    struct Symbol* sym;
+    struct SymList* next;
+} SymList;
+
+typedef struct State{
+    struct SymList* symbols;
     struct State* next;
     struct State* prev;
 } State;
 
-/* 
- * Position in symbolArray is Symbol value
- */
-typedef struct Symbol{
-    State* changeTo;
-    struct Symbol* next;
-} Symbol;
-
-
 /*
  * NFA related functions
  */
+
 State* initNFAStates();
-State* addNFAStates();
-State* nextState(State* s);
-State* prevState(State* s);
+State* getNextState(int n); //advances current state n times 
+State* getCurrState();
+State* getPrevState(int n); //goes back n times and sets curr state
 State* getNFAStateRelation(State* toGet, char symbol);
 State* setNFAStateRelation(char symbol, State* from, State* to);
 void printNFAStateTable();

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "automata.h"
 
+static State* currNFAState;
+
 /*
 * State table is a linked list of arrays of linked
 * lists.
@@ -9,11 +11,10 @@
 * would be incredibly messy and horrible. Ew.
 */
 
-State* initNFAStates(int numStates)
+State* allocNFAStates(int statesToAlloc)
 {   int i,j;
-    numStates = 256;
     State *this, *prev, *start;
-    for(i = 0;i < numStates;i++)
+    for(i = 0;i < statesToAlloc;i++)
     {
         this = malloc(sizeof(State));    
         if(i == 0)
@@ -21,16 +22,15 @@ State* initNFAStates(int numStates)
         this->prev = prev;
         if(prev != (State*)NULL)
             prev->next = this;
-        this->symbolArray = malloc(NUMSYMBOLS * sizeof(Symbol));
         prev = this;
     }
     return start;
 }
 
-State* addNFAStates(State toAdd)
-{
-    State a;
-    return &a;
+State* initNFAStates(int numStates)
+{   
+    currNFAState = allocNFAStates(256);
+    return currNFAState;
 }
 
 State* nextState(State* s)
@@ -60,12 +60,59 @@ void printNFAStateTable()
 
 State* getNFAStateRelation(State* toGet, char symbol)
 {
-    State a;
-    return &a;
+    //TODO
+    return malloc(sizeof(State));
 }
 
 State* setNFAStateRelation(char symbol, State* from, State* to)
 {
-    State a;
-    return &a;
+    if((int)symbol < 128 && (int)symbol >= 0 &&
+        from != NULL)
+    {
+        if(from->symbols != NULL)
+        {
+            from->symbols = malloc(sizeof(SymList));
+            from->symbols->val = symbol;
+            from->symbols->sym = malloc(sizeof(Symbol));
+            from->symbols->sym->change = to;
+            from->symbols->sym->next = NULL;
+            from->symbols->next = NULL;
+        }
+        else
+        {
+            //find if symbol is already in SymList
+            int found = 0;
+            SymList* lastList;
+            SymList* t = from->symbols;
+            while(t != NULL)
+            {
+                if(t->val == symbol)
+                {
+                    found = 1;
+                    break;
+                }
+                lastList = t;
+                t = t->next;
+            }
+            if(found == 0)
+            {
+               t = malloc(sizeof(SymList)); 
+               lastList->next = t;
+               t->val = symbol;
+               t->sym = malloc(sizeof(Symbol));
+               t->sym->change = to;
+            }
+
+            Symbol* lastSym;
+            Symbol* s = t->sym;
+            while(s != NULL)
+            {
+                lastSym = s;
+                s = s->next;
+            }
+            s = malloc(sizeof(Symbol));
+            lastSym->next = s;
+        }
+    }
+    return malloc(sizeof(State*));
 }

@@ -8,7 +8,6 @@ void factor();
 void term();
 void regex();
 
-static State* currNFAState;
 /* 
  * Recursive descent parser to parse regex expressions,
  * uses syntax directed translation to translate
@@ -29,10 +28,10 @@ void chars()
         else if(!isRepOp(getCurrChar()))
         {
             //handle normal char
-            if(setNFAStateRelation(getCurrChar(),currNFAState,nextState(currNFAState)) == -1)
-                printf(" Error setting NFA state, currNFAState is %ld \n",currNFAState);
+            if(setNFAStateRelation(getCurrChar(),getCurrState(),getNextState(1)) == (State*)-1)
+                printf(" Error setting NFA state, currNFAState is %d \n",(int)getCurrState());
 
-            currNFAState = nextState(nextState(currNFAState));
+            getNextState(2);
             getNextChar();
         }
         else
@@ -99,7 +98,6 @@ int main(int argc, char **argv)
     int i;
     clock_t begin, end;
     double timeTaken;
-    currNFAState = 0;
     initNFAStates();
 
     if(getChars(argc,argv) != NULL)
