@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "automata.h"
+//TODO Optimise later
 
 static State* currNFAState;
+static unsigned int statesAllocated;
+
 
 /*
 * State table is a linked list of arrays of linked
@@ -14,6 +17,7 @@ static State* currNFAState;
 State* allocNFAStates(int statesToAlloc)
 {   int i,j;
     State *this, *prev, *start;
+    prev = (State*)NULL;
     for(i = 0;i < statesToAlloc;i++)
     {
         this = malloc(sizeof(State));    
@@ -23,30 +27,70 @@ State* allocNFAStates(int statesToAlloc)
         if(prev != (State*)NULL)
             prev->next = this;
         prev = this;
+        this->symbol = (SymList*)NULL;
     }
+    this->next = (State*)NULL;
     return start;
 }
 
 State* initNFAStates(int numStates)
 {   
-    currNFAState = allocNFAStates(256);
+    currNFAState = (State*)NULL;
+    if(numStates > 0)
+    {
+        currNFAState = allocNFAStates(numStates);
+        statesAllocated = numStates;
+    }
     return currNFAState;
 }
 
-State* nextState(State* s)
+State* getCurrState()
 {
-    if(s != NULL)
-        return s->next;
-    printf("Error, null pointer given during state change\n");
-    return (State*)-1;
+    return currNFAState;
 }
 
-State* prevState(State* s)
+State* setCurrState(State* s)
 {
-    if(s != NULL)
-        return s->prev;
-    printf("Error, null pointer given during state change\n");
-    return (State*)-1;
+    if(s != (State*)NULL)
+        currNFAState = s;
+    return currNFAState;
+}
+
+State* getNextState(int n)
+{   int i;
+    int hitEnd = 0;
+    State* last;
+    State* t = currNFAState;
+    for(i = 0;i < n;i++)
+    {
+        if(t != (State*)NULL)
+            t = t->next;
+        else
+            hitEnd = 1;
+    }
+    if(hitEnd == 1)
+    {
+        t = allocNFAStates(2 * statesAllocated);
+        last->next = t;
+        t->prev = last;
+    }
+    return t;
+}
+
+State* getPrevState(int n)
+{   int i;
+    int hitEnd = 0;
+    State* t = currNFAState;
+    for(i = 0;i < n;i++)
+    {
+        if(t != NULL)
+            t = t->prev;
+        else
+            hitEnd = 1;
+    }
+    if(hitEnd == 1)
+        printf("Warning; hit beginning of states, returning null pointer");
+    return t;
 }
 
 void freeNFAStates()
@@ -69,22 +113,22 @@ State* setNFAStateRelation(char symbol, State* from, State* to)
     if((int)symbol < 128 && (int)symbol >= 0 &&
         from != NULL)
     {
-        if(from->symbols != NULL)
+        if(from->symbol == (SymList*)NULL)
         {
-            from->symbols = malloc(sizeof(SymList));
-            from->symbols->val = symbol;
-            from->symbols->sym = malloc(sizeof(Symbol));
-            from->symbols->sym->change = to;
-            from->symbols->sym->next = NULL;
-            from->symbols->next = NULL;
+            from->symbol = malloc(sizeof(SymList));
+            from->symbol->val = symbol;
+            from->symbol->sym = malloc(sizeof(Symbol));
+            from->symbol->sym->change = to;
+            from->symbol->sym->next = (Symbol*)NULL;
+            from->symbol->next = (SymList*)NULL;
         }
         else
         {
             //find if symbol is already in SymList
             int found = 0;
             SymList* lastList;
-            SymList* t = from->symbols;
-            while(t != NULL)
+            SymList* t = from->symbol;
+            while(t != (SymList*)NULL)
             {
                 if(t->val == symbol)
                 {
@@ -114,5 +158,5 @@ State* setNFAStateRelation(char symbol, State* from, State* to)
             lastSym->next = s;
         }
     }
-    return malloc(sizeof(State*));
+    return malloc(sizeof(State));
 }

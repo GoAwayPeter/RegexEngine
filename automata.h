@@ -22,7 +22,7 @@ typedef struct SymList{
 } SymList;
 
 typedef struct State{
-    struct SymList* symbols;
+    struct SymList* symbol;
     struct State* next;
     struct State* prev;
 } State;
@@ -32,9 +32,11 @@ typedef struct State{
  */
 
 State* initNFAStates();
-State* getNextState(int n); //advances current state n times 
+State* advanceState(int n); //advances current state n times
+State* getNextState(int n); //gets nth state in front of current 
+State* setCurrState(State* s);
 State* getCurrState();
-State* getPrevState(int n); //goes back n times and sets curr state
+State* getPrevState(int n); //goes back n times
 State* getNFAStateRelation(State* toGet, char symbol);
 State* setNFAStateRelation(char symbol, State* from, State* to);
 void printNFAStateTable();
