@@ -8,20 +8,25 @@ int main(int argc, char** argv)
         printf("initNFAStates returned correctly\n");
 
     //test setNFAStateRelation function
-    printf("adding 1 symbol to 128 consecutive states, should print \
-            ascii table\n");
+    printf("adding 1 symbol to 128 consecutive states, should print ascii table\n");
     State* start = getCurrState();
-    for(i = 0;i < 128;i++)
+    int j;
+    for(j = 0;j < 10;j++)
     {
-        setNFAStateRelation((char)i,getCurrState(),getNextState(1)); 
-        if(setCurrState(getNextState(1)) == (State*)NULL)
-            printf("Null curr state! ARghhhh!!!");
+        for(i = 32;i < 40;i++)
+        {
+            setNFAStateRelation((char)i,getCurrState(),getNextState(1)); 
+            if(setCurrState(getNextState(1)) == -1)
+                printf("set current state failed %d\n",i);
+        }
     }
     setCurrState(start);
-    for(i = 0;i < 128;i++)
+    for(i = 32;i < 160;i++)
     {
-        printf("%c",getCurrState()->symbol->val);
-        setCurrState(getNextState(1));
+        if(getCurrState()->rool != (Rule*)NULL)
+            printf("%c",getCurrState()->rool->rule);
+        if(setCurrState(getNextState(1)) == -1)
+                printf("set current state failed %d\n",i);
     }
-
+    printf("\n");
 }

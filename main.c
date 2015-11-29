@@ -28,10 +28,10 @@ void chars()
         else if(!isRepOp(getCurrChar()))
         {
             //handle normal char
-            if(setNFAStateRelation(getCurrChar(),getCurrState(),getNextState(1)) == (State*)-1)
-                printf(" Error setting NFA state, currNFAState is %d \n",(int)getCurrState());
-
-            getNextState(2);
+            if(setNFAStateRelation(getCurrChar(),getCurrState(),getNextState(1)) == -1)
+               printf(" Error setting NFA state, currNFAState is %d \n",
+                                                    (int)getCurrState());
+            setCurrState(getNextState(2));
             getNextChar();
         }
         else
@@ -94,11 +94,10 @@ void regex()
 }
 
 int main(int argc, char **argv)
-{
-    int i;
+{   int i;
     clock_t begin, end;
     double timeTaken;
-    initNFAStates();
+    initNFAStates(128);
 
     if(getChars(argc,argv) != NULL)
     {
@@ -118,7 +117,6 @@ int main(int argc, char **argv)
         end = clock();
         timeTaken = (double)(end - begin)/CLOCKS_PER_SEC * 1000;
 
-        printNFAStateTable();
 
         printf("\n Regex parsed in %f ms\n",timeTaken);
     }

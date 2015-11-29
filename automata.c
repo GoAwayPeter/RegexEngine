@@ -27,7 +27,7 @@ State* allocNFAStates(int statesToAlloc)
         if(prev != (State*)NULL)
             prev->next = this;
         prev = this;
-        this->symbol = (SymList*)NULL;
+        this->rool = (Rule*)NULL;
     }
     this->next = (State*)NULL;
     return start;
@@ -36,11 +36,13 @@ State* allocNFAStates(int statesToAlloc)
 State* initNFAStates(int numStates)
 {   
     currNFAState = (State*)NULL;
-    if(numStates > 0)
+    if(numStates < 0)
     {
-        currNFAState = allocNFAStates(numStates);
-        statesAllocated = numStates;
+        printf("Error initialising NFA states: incorrect numstates arg\n");
+        exit(1);
     }
+    currNFAState = allocNFAStates(numStates);
+    statesAllocated = numStates;
     return currNFAState;
 }
 
@@ -49,11 +51,15 @@ State* getCurrState()
     return currNFAState;
 }
 
-State* setCurrState(State* s)
+int setCurrState(State* s)
 {
-    if(s != (State*)NULL)
-        currNFAState = s;
-    return currNFAState;
+    if(s == (State*)NULL)
+    {
+        printf("Error setting current state, arg passed is null\n");
+        exit(1);
+    }
+    currNFAState = s;
+    return 0;
 }
 
 State* getNextState(int n)
@@ -61,18 +67,22 @@ State* getNextState(int n)
     int hitEnd = 0;
     State* last;
     State* t = currNFAState;
-    for(i = 0;i < n;i++)
+    if(n > 0)
     {
-        if(t != (State*)NULL)
-            t = t->next;
-        else
-            hitEnd = 1;
-    }
-    if(hitEnd == 1)
-    {
-        t = allocNFAStates(2 * statesAllocated);
-        last->next = t;
-        t->prev = last;
+        for(i = 0;i < n;i++)
+        {
+            if(t != (State*)NULL)
+            {
+                last = t;
+                t = t->next;
+            }
+            else
+            {
+                t = allocNFAStates(2 * statesAllocated);
+                last->next = t;
+                t->prev = last;
+            }
+        }
     }
     return t;
 }
@@ -93,14 +103,12 @@ State* getPrevState(int n)
     return t;
 }
 
+//implement later, nobody likes cleaning up
 void freeNFAStates()
 {
     int i,j;
 }
 
-void printNFAStateTable()
-{
-}
 
 State* getNFAStateRelation(State* toGet, char symbol)
 {
@@ -108,29 +116,29 @@ State* getNFAStateRelation(State* toGet, char symbol)
     return malloc(sizeof(State));
 }
 
-State* setNFAStateRelation(char symbol, State* from, State* to)
-{
-    if((int)symbol < 128 && (int)symbol >= 0 &&
-        from != NULL)
+int setNFAStateRelation(char symbol, State* from, State* to)
+{   
+    if((( symbol < 127 && symbol >= 32) || symbol == EPSILON) 
+            && from != NULL)
     {
-        if(from->symbol == (SymList*)NULL)
+        if(from->rool == (Rule*)NULL)
         {
-            from->symbol = malloc(sizeof(SymList));
-            from->symbol->val = symbol;
-            from->symbol->sym = malloc(sizeof(Symbol));
-            from->symbol->sym->change = to;
-            from->symbol->sym->next = (Symbol*)NULL;
-            from->symbol->next = (SymList*)NULL;
+            from->rool = malloc(sizeof(Rule));
+//            from->rool->val = rool; //TODO
+            from->rool->mov = malloc(sizeof(Move));
+            from->rool->mov->change = to;
+            from->rool->mov->next = (Move*)NULL;
+            from->rool->next = (Rule*)NULL;
         }
         else
         {
-            //find if symbol is already in SymList
+            //find if symbol is already in Rule
             int found = 0;
-            SymList* lastList;
-            SymList* t = from->symbol;
-            while(t != (SymList*)NULL)
+            Rule* lastList;
+            Rule* t = from->rool;
+            while(t != (Rule*)NULL)
             {
-                if(t->val == symbol)
+                if(t->rule(symbol))
                 {
                     found = 1;
                     break;
@@ -140,23 +148,27 @@ State* setNFAStateRelation(char symbol, State* from, State* to)
             }
             if(found == 0)
             {
-               t = malloc(sizeof(SymList)); 
+               t = malloc(sizeof(Rule)); 
                lastList->next = t;
-               t->val = symbol;
-               t->sym = malloc(sizeof(Symbol));
-               t->sym->change = to;
+//               t->val = rule; //TODO
+               t->mov = malloc(sizeof(Move));
+               t->mov->change = to;
+               t->mov->next = (Move*)NULL;
+               t->next = (Rule*)NULL;
             }
 
-            Symbol* lastSym;
-            Symbol* s = t->sym;
-            while(s != NULL)
+            Move* lastSym;
+            Move* s = t->mov;
+            while(s != (Move*)NULL)
             {
                 lastSym = s;
                 s = s->next;
             }
-            s = malloc(sizeof(Symbol));
-            lastSym->next = s;
+            s = malloc(sizeof(Move));
+            lastSym->next = s; 
         }
+        return 0;
     }
-    return malloc(sizeof(State));
+    printf("Setting NFA state failed. Invalid Character\n");
+    return -1;
 }

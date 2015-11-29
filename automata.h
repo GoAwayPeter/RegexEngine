@@ -2,27 +2,30 @@
     #define _AUTOMATA_H_
 
 #define NUMSYMBOLS 128
-#define EPSILON 0
-#define NOMOVE //TODO
+#define EPSILON 27
 
 /* 
- * Position in symbolArray is Symbol value
+ * NFA data structure
  */
 struct State;
 
-typedef struct Symbol{
+typedef struct Move{
     struct State* change;
-    struct Symbol* next;
-} Symbol;
+    struct Move* next;
+} Move;
 
-typedef struct SymList{
-    char val;
-    struct Symbol* sym;
-    struct SymList* next;
-} SymList;
+/*
+ * List of possible states to change to on given rule
+ * possibly rename to Rule?
+ */
+typedef struct Rule{
+    int (*rule)(char); 
+    struct Move* mov;
+    struct Rule* next;
+} Rule;
 
 typedef struct State{
-    struct SymList* symbol;
+    struct Rule* rool;
     struct State* next;
     struct State* prev;
 } State;
@@ -31,14 +34,13 @@ typedef struct State{
  * NFA related functions
  */
 
-State* initNFAStates();
+State* initNFAStates(int numStates);
 State* advanceState(int n); //advances current state n times
 State* getNextState(int n); //gets nth state in front of current 
-State* setCurrState(State* s);
+int setCurrState(State* s);
 State* getCurrState();
 State* getPrevState(int n); //goes back n times
 State* getNFAStateRelation(State* toGet, char symbol);
-State* setNFAStateRelation(char symbol, State* from, State* to);
-void printNFAStateTable();
+int setNFAStateRelation(char symbol, State* from, State* to);
 
 #endif
