@@ -24,7 +24,7 @@ int main(int argc, char** argv)
     for(i = 32;i < 160;i++)
     {
         if(getCurrState()->rool != (Rule*)NULL)
-            printf("%c",getCurrState()->rool->rule);
+            printf("%c",(char)getCurrState()->rool->rule);
         if(setCurrState(getNextState(1)) == -1)
                 printf("set current state failed %d\n",i);
     }
