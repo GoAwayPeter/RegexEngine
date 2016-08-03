@@ -4,11 +4,16 @@
 #define NUMSYMBOLS 128
 #define EPSILON 27
 
+/*
+ * Globals
+ */
+struct State;
+static struct State* __automata_currNFAState;
+static unsigned int __automata_statesAllocated;
+
 /* 
  * NFA data structure
  */
-struct State;
-
 typedef struct Move{
     struct State* change;
     struct Move* next;
@@ -19,7 +24,8 @@ typedef struct Move{
  * possibly rename to Rule?
  */
 typedef struct Rule{
-    int (*rule)(char); 
+//    int (*rule)(char); 
+    char symbol;
     struct Move* mov;
     struct Rule* next;
 } Rule;
@@ -35,12 +41,13 @@ typedef struct State{
  */
 
 State* initNFAStates(int numStates);
-State* advanceState(int n); //advances current state n times
+//State* advanceState(int n); //advances current state n times
 State* getNextState(int n); //gets nth state in front of current 
+State* getPrevState(int n); //goes back n times
 int setCurrState(State* s);
 State* getCurrState();
-State* getPrevState(int n); //goes back n times
 State* getNFAStateRelation(State* toGet, char symbol);
 int setNFAStateRelation(char symbol, State* from, State* to);
+void printStates();
 
 #endif

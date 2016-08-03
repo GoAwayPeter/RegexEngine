@@ -3,9 +3,6 @@
 #include "automata.h"
 //TODO Optimise later
 
-static State* currNFAState;
-static unsigned int statesAllocated;
-
 
 /*
 * State table is a linked list of arrays of linked
@@ -35,20 +32,58 @@ State* allocNFAStates(int statesToAlloc)
 
 State* initNFAStates(int numStates)
 {   
-    currNFAState = (State*)NULL;
+    __automata_currNFAState = (State*)NULL;
     if(numStates < 0)
     {
         printf("Error initialising NFA states: incorrect numstates arg\n");
         exit(1);
     }
-    currNFAState = allocNFAStates(numStates);
-    statesAllocated = numStates;
-    return currNFAState;
+    __automata_currNFAState = allocNFAStates(numStates);
+    __automata_statesAllocated = numStates;
+    return __automata_currNFAState;
 }
 
 State* getCurrState()
 {
-    return currNFAState;
+    return __automata_currNFAState;
+}
+
+void printStates(int num)
+{   int i,j;
+
+    State* currState = getCurrState();
+    State* prevState; 
+    printf("a");
+    while(currState != (State*)NULL)
+    {
+        setCurrState(currState);
+        prevState = currState;
+        currState = getPrevState(1);
+    }
+    //*currState = *prevState;
+
+    printf("c");
+    /*
+    for(i = 0;i < num;i++)
+    {
+        setCurrState(currState);
+        if(currState != NULL && currState->rool != NULL)
+        {
+            Rule* rule = currState->rool;
+            while(rule != (Rule*)NULL)
+            {
+                printf("%c, ", rule->symbol);
+                Move* mov = currState->rool->mov;
+                while(mov != (Move*)NULL)
+                {
+                    mov = mov->next; 
+                }
+                rule = rule->next;
+            }
+        }
+        currState = getNextState(1);
+    }
+    */
 }
 
 int setCurrState(State* s)
@@ -58,7 +93,7 @@ int setCurrState(State* s)
         printf("Error setting current state, arg passed is null\n");
         exit(1);
     }
-    currNFAState = s;
+    __automata_currNFAState = s;
     return 0;
 }
 
@@ -66,7 +101,7 @@ State* getNextState(int n)
 {   int i;
     int hitEnd = 0;
     State* last;
-    State* t = currNFAState;
+    State* t = __automata_currNFAState;
     if(n > 0)
     {
         for(i = 0;i < n;i++)
@@ -78,7 +113,7 @@ State* getNextState(int n)
             }
             else
             {
-                t = allocNFAStates(2 * statesAllocated);
+                t = allocNFAStates(2 * __automata_statesAllocated);
                 last->next = t;
                 t->prev = last;
             }
@@ -90,13 +125,16 @@ State* getNextState(int n)
 State* getPrevState(int n)
 {   int i;
     int hitEnd = 0;
-    State* t = currNFAState;
+    State* t = __automata_currNFAState;
     for(i = 0;i < n;i++)
     {
         if(t != NULL)
             t = t->prev;
         else
+        {
             hitEnd = 1;
+            break;
+        }
     }
     if(hitEnd == 1)
         printf("Warning; hit beginning of states, returning null pointer");
@@ -118,13 +156,13 @@ State* getNFAStateRelation(State* toGet, char symbol)
 
 int setNFAStateRelation(char symbol, State* from, State* to)
 {   
-    if((( symbol < 127 && symbol >= 32) || symbol == EPSILON) 
+    if((( symbol < 127 && symbol >= 32) || symbol == EPSILON || symbol == '.') 
             && from != NULL)
     {
         if(from->rool == (Rule*)NULL)
         {
             from->rool = malloc(sizeof(Rule));
-//            from->rool->val = rool; //TODO
+            from->rool->symbol = symbol; 
             from->rool->mov = malloc(sizeof(Move));
             from->rool->mov->change = to;
             from->rool->mov->next = (Move*)NULL;
@@ -138,7 +176,7 @@ int setNFAStateRelation(char symbol, State* from, State* to)
             Rule* t = from->rool;
             while(t != (Rule*)NULL)
             {
-                if(t->rule(symbol))
+                if(t->symbol == symbol)
                 {
                     found = 1;
                     break;
@@ -150,7 +188,7 @@ int setNFAStateRelation(char symbol, State* from, State* to)
             {
                t = malloc(sizeof(Rule)); 
                lastList->next = t;
-//               t->val = rule; //TODO
+               t->symbol = symbol; 
                t->mov = malloc(sizeof(Move));
                t->mov->change = to;
                t->mov->next = (Move*)NULL;

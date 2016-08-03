@@ -6,51 +6,52 @@ char *getChars(int argc, char **argv)
 {
     if(argc > 1)
     {
-        regexData = (char *)malloc(100 * sizeof(char));
+        __cradle_regexData = (char *)malloc(REGEXDATASIZE * sizeof(char));
 
         int i = 0;
-        while(i < 99)
+        while(i < REGEXDATASIZE)
         {
-            regexData[i] = argv[1][i];
-            if(regexData[i] == '\0')
+            __cradle_regexData[i] = argv[1][i];
+            if(__cradle_regexData[i] == '\0')
                 break;
             i++;
         }
 
 //        file = argv[2];
 
-        look = regexData;
-        lookBegin = look;
+        __cradle_look = __cradle_regexData;
+        __cradle_lookBegin = __cradle_look;
     }
     else
         return NULL;
-    return regexData;
+    return __cradle_regexData;
 }
+
 char getPrevChar()
 {
-    if(look - 1 != NULL && look - 1 >= lookBegin)
-        return *(look - 1);
+    if(__cradle_look - 1 != NULL && __cradle_look - 1 >= __cradle_lookBegin)
+        return *(__cradle_look - 1);
     return 0;
 }
 
 char getNextChar()
 {
-    if(*look != '\0')
+    if(*__cradle_look != '\0')
     {
-        look++;
-        if(look != NULL)
+        __cradle_look++;
+        if(__cradle_look != NULL)
         {
-            printf("%c",*look);
-            return *look;
+            printf("%c",*__cradle_look);
+            return *__cradle_look;
         }
     }
-    return 0;
+    return *__cradle_look = *__cradle_lookBegin;
 }
 
 char getCurrChar()
 {
-    if(look != NULL)
-        return *look;
+    if(__cradle_look != NULL)
+        return *__cradle_look;
     return 0;
 }
 
@@ -59,6 +60,10 @@ char getCurrChar()
  *
  *
  */
+int isWildCard(char wildcard)
+{
+    return wildcard == 0x56 ? 1 : 0;
+}
 
 int isAlpha(char alpha)
 {

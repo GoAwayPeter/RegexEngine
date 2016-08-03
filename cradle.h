@@ -1,13 +1,14 @@
 #ifndef _CRADLE_H_
     #define _CRADLE_H_
 
+#define REGEXDATASIZE 100
 /*
  * Global data;
  */
-char *look;
-char static *lookBegin;
-char *regexData;
-char *file;
+char *__cradle_look;
+static char *__cradle_lookBegin;
+char *__cradle_regexData;
+char *__cradle_file;
 
 char *getChars(int argc, char **argv);
 
@@ -16,6 +17,8 @@ char getCurrChar();
 char getNextChar();
 
 char getPrevChar();
+
+int isWildCard(char wildcard);
 
 int isAlpha(char alpha);
 

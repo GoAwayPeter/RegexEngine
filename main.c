@@ -3,20 +3,29 @@
 #include "cradle.h"
 #include "automata.h"
 
+/*
+ * Recursive descent parser to parse regex expressions,
+ * uses syntax directed translation to translate
+ * the regex to an NFA, and then hopefully I'll figure out
+ * how to convert the NFA to a DFA
+ *
+ * Simple grammar for regex in BNF form, TODO expand
+ * 
+ *  <regex>     ::= <term> '|' <regex> | <term>
+ *  <term>      ::= <factor><term> | <factor> '*' | <factor>
+ *  <factor>    ::= '(' <regex> ')' | <chars>
+ *  <chars>     ::= <chars><char> | '\'<chars><char> | <char>
+ *  <char>      ::= 'a' | 'b' | 'c' | 'd' | ...
+ **/
+
 void chars();
 void factor();
 void term();
 void regex();
 
-/* 
- * Recursive descent parser to parse regex expressions,
- * uses syntax directed translation to translate
- * the regex to an NFA, and then hopefully I'll figure out
- * how to convert the NFA to a DFA
- * */
 void chars()
 {
-    while(isAlpha(getCurrChar()) || getCurrChar() == '\\')
+    while(isAlpha(getCurrChar()) || getCurrChar() == '\\' || isWildCard(getCurrChar()))
     {
         if(getCurrChar() == '\\')
         {
@@ -102,6 +111,7 @@ int main(int argc, char **argv)
     if(getChars(argc,argv) != NULL)
     {
         begin = clock();
+        printf("%c",getCurrChar());
         regex();
 
         if(getCurrChar() == '\0')
@@ -123,5 +133,6 @@ int main(int argc, char **argv)
     else 
         printf("Not enough arguments given\n");
 
+    printStates(10);
     return 0;
 }
