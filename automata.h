@@ -15,7 +15,7 @@ static unsigned int __automata_statesAllocated;
  * NFA data structure
  */
 typedef struct Move{
-    struct State* change;
+    struct State* to;
     struct Move* next;
 } Move;
 
@@ -24,7 +24,7 @@ typedef struct Move{
  * possibly rename to Rule?
  */
 typedef struct Rule{
-//    int (*rule)(char); 
+//    int (*rule)(char);  //TODO why was I going to do this?
     char symbol;
     struct Move* mov;
     struct Rule* next;

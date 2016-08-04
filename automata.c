@@ -101,25 +101,25 @@ State* getNextState(int n)
 {   int i;
     int hitEnd = 0;
     State* last;
-    State* t = __automata_currNFAState;
+    State* next = __automata_currNFAState;
     if(n > 0)
     {
         for(i = 0;i < n;i++)
         {
-            if(t != (State*)NULL)
+            if(next != (State*)NULL)
             {
-                last = t;
-                t = t->next;
+                last = next;
+                next = next->next;
             }
             else
             {
-                t = allocNFAStates(2 * __automata_statesAllocated);
-                last->next = t;
-                t->prev = last;
+                next = allocNFAStates(2 * __automata_statesAllocated);
+                last->next = next;
+                next->prev = last;
             }
         }
     }
-    return t;
+    return next;
 }
 
 State* getPrevState(int n)
@@ -159,20 +159,20 @@ int setNFAStateRelation(char symbol, State* from, State* to)
     if((( symbol < 127 && symbol >= 32) || symbol == EPSILON || symbol == '.') 
             && from != NULL)
     {
-        if(from->rool == (Rule*)NULL)
+        if(from->rool == (Rule*)NULL) //rule doesn't exist yet
         {
             from->rool = malloc(sizeof(Rule));
             from->rool->symbol = symbol; 
             from->rool->mov = malloc(sizeof(Move));
-            from->rool->mov->change = to;
+            from->rool->mov->to = to;
             from->rool->mov->next = (Move*)NULL;
             from->rool->next = (Rule*)NULL;
         }
-        else
+        else //rule exists but we don't know if our symbol is in Rule list
         {
-            //find if symbol is already in Rule
+            //find if symbol is already in Rule list
             int found = 0;
-            Rule* lastList;
+            Rule* lastRule;
             Rule* t = from->rool;
             while(t != (Rule*)NULL)
             {
@@ -181,29 +181,38 @@ int setNFAStateRelation(char symbol, State* from, State* to)
                     found = 1;
                     break;
                 }
-                lastList = t;
+                lastRule = t;
                 t = t->next;
             }
-            if(found == 0)
+            if(found == 0) //symbol is not in Rule list, add it
             {
-               t = malloc(sizeof(Rule)); 
-               lastList->next = t;
-               t->symbol = symbol; 
-               t->mov = malloc(sizeof(Move));
-               t->mov->change = to;
-               t->mov->next = (Move*)NULL;
-               t->next = (Rule*)NULL;
+                t = malloc(sizeof(Rule)); 
+                lastRule->next = t;
+                t->symbol = symbol; 
+                t->mov = malloc(sizeof(Move));
+                t->mov->to = to;
+                t->mov->next = (Move*)NULL;
+                t->next = (Rule*)NULL;
             }
-
-            Move* lastSym;
-            Move* s = t->mov;
-            while(s != (Move*)NULL)
+            else //symbol is in Rule list, add new move.
             {
-                lastSym = s;
-                s = s->next;
+                Move* lastMov;
+                Move* s = t->mov;
+                while(s != (Move*)NULL)
+                {
+                    if(s->to == to)
+                    {
+                        printf("Move already exists\n");
+                        return 0; //move already exists
+                    }
+                    lastMov = s;
+                    s = s->next;
+                }
+                s = malloc(sizeof(Move));
+                s->to = to;
+                s->next = (Move*)NULL;
+                lastMov->next = s; 
             }
-            s = malloc(sizeof(Move));
-            lastSym->next = s; 
         }
         return 0;
     }
