@@ -42,12 +42,29 @@ typedef struct State{
 
 State* initNFAStates(int numStates);
 //State* advanceState(int n); //advances current state n times
-State* getNextState(int n); //gets nth state in front of current 
-State* getPrevState(int n); //goes back n times
+/*
+ * Go forward n states
+ */
+State* getNextState(int n);  
+/*
+ * Go back n states
+ */
+State* getPrevState(int n); 
 int setCurrState(State* s);
 State* getCurrState();
+/* 
+ * Is this necessary?
+ */
 State* getNFAStateRelation(State* toGet, char symbol);
+/* 
+ * Sets NFA state relation
+ */
 int setNFAStateRelation(char symbol, State* from, State* to);
+/* 
+ * Returns linked list of States can move to from 'from' State on
+ * symbol 
+ */
+State* moveState(State* from, char symbol);
 void printStates();
 
 #endif
