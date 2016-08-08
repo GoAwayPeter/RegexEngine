@@ -38,4 +38,15 @@ int main(int argc, char** argv)
         setNFAStateRelation((currentChar + i) % 94 + 32, getCurrState(), getNextState(1));
     }
     printf("\nSuccess!\n\n\n");
+
+
+    List* startList = getNFAStates(currentChar);
+    List* currList = startList;
+    while(currList != (List*)NULL)
+    {
+        printf(" %c ",currList->state->rool->symbol);
+        currList = currList->next;
+    }
+
+    printf("\nSuccess!\n\n\n");
 }

@@ -13,16 +13,14 @@ static unsigned int __automata_statesAllocated;
 
 /* 
  * NFA data structure
+ * - reuse this structure for DFA's?
+ *   too flexible - will allow invalid DFA states
  */
 typedef struct Move{
     struct State* to;
     struct Move* next;
 } Move;
 
-/*
- * List of possible states to change to on given rule
- * possibly rename to Rule?
- */
 typedef struct Rule{
 //    int (*rule)(char);  //TODO why was I going to do this?
     char symbol;
@@ -35,6 +33,15 @@ typedef struct State{
     struct State* next;
     struct State* prev;
 } State;
+
+
+/* List of pointers to States */
+
+typedef struct List{
+    struct State* state;
+    struct List* next;
+    struct List* prev;
+} List;
 
 /*
  * NFA related functions
@@ -53,9 +60,9 @@ State* getPrevState(int n);
 int setCurrState(State* s);
 State* getCurrState();
 /* 
- * Is this necessary?
+ * Returns array of pointers to states reachable by symbol 
  */
-State* getNFAStateRelation(State* toGet, char symbol);
+List* getNFAStates(char symbol);
 /* 
  * Sets NFA state relation
  */

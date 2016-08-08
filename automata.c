@@ -1,8 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "automata.h"
-//TODO Optimise later
-
+/* 
+ * TODO 
+ * - optimisations
+ * - nfa to dfa conversion
+ */
 
 /*
 * State table is a linked list of arrays of linked
@@ -11,6 +14,11 @@
 * would be incredibly messy and horrible. Ew.
 */
 
+/* 
+ * Allocates memory for nfa states - this is called in 
+ * the initialisation of the states, and if we request
+ * the 'next' state, but it doesn't exist yet
+ */
 State* allocNFAStates(int statesToAlloc)
 {   int i,j;
     State *this, *prev, *start;
@@ -30,6 +38,9 @@ State* allocNFAStates(int statesToAlloc)
     return start;
 }
 
+/*
+ * Initialise the automata library
+ */
 State* initNFAStates(int numStates)
 {   
     __automata_currNFAState = (State*)NULL;
@@ -43,11 +54,17 @@ State* initNFAStates(int numStates)
     return __automata_currNFAState;
 }
 
+/*
+ * Returns a pointer to the current State
+ */
 State* getCurrState()
 {
     return __automata_currNFAState;
 }
 
+/*
+ * TODO for debugging
+ */
 void printStates(int num)
 {   int i,j;
 
@@ -86,6 +103,9 @@ void printStates(int num)
     */
 }
 
+/*
+ * Change the current state
+ */
 int setCurrState(State* s)
 {
     if(s == (State*)NULL)
@@ -97,6 +117,9 @@ int setCurrState(State* s)
     return 0;
 }
 
+/* 
+ * Gets the next State from the current State
+ */
 State* getNextState(int n)
 {   int i;
     int hitEnd = 0;
@@ -122,6 +145,9 @@ State* getNextState(int n)
     return next;
 }
 
+/*
+ * Get the previous state from the current State
+ */
 State* getPrevState(int n)
 {   int i;
     int hitEnd = 0;
@@ -141,19 +167,55 @@ State* getPrevState(int n)
     return t;
 }
 
-//implement later, nobody likes cleaning up
+/* 
+ * TODO implement later, nobody likes cleaning up
+ */
 void freeNFAStates()
 {
     int i,j;
 }
 
-
-State* getNFAStateRelation(State* toGet, char symbol)
+/* 
+ * Returns array of pointers to states reachable by symbol 
+ * from the current State
+ */
+List* getNFAStates(char symbol)
 {
-    //TODO
-    return malloc(sizeof(State));
+    List* startList, *currList, *lastList;
+    Rule* rule;
+
+    if(__automata_currNFAState->rool != NULL)
+    {
+        rule = __automata_currNFAState->rool;
+        while(rule != (Rule*)NULL) 
+        {
+            if(rule->symbol == symbol)
+            {
+                if(startList == (List*)NULL)
+                {
+                    startList = malloc(sizeof(List));
+                    currList = startList;
+                }
+                if(currList == (List*)NULL)
+                {
+                    currList = malloc(sizeof(List));
+                    currList->prev = lastList;
+                    currList->next = (List*)NULL;
+                    lastList->next = currList;
+                }
+                currList->state = rule->mov->to;
+                lastList = currList;
+                currList = currList->next;
+            }
+            rule = rule->next;
+        }
+    }
+    return startList;
 }
 
+/*
+ * Sets a relation between 2 states
+ */
 int setNFAStateRelation(char symbol, State* from, State* to)
 {   
     if((( symbol < 127 && symbol >= 32) || symbol == EPSILON || symbol == '.') 
