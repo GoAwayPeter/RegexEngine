@@ -39,17 +39,11 @@ int main(int argc, char** argv)
     }
     printf("\nTest 2 completed successfully.\n\n\n");
 
-
-    List* startList = getNFAStates(currentChar);
-    List* currList = startList;
-    Rule* arule;
-    State* astate;
-    Move* mov;
-
-    while(currList != (List*)NULL)
+    List* list = getNFAStates(currentChar);
+    while(list != (List*)NULL)
     {
-        printf(" %c ",currList->state->rool->symbol); //printing added symbols
-        currList = currList->next;
+        printf(" %c ",list->state->rool->symbol); //printing added symbols
+        list = list->next;
     }
 
     printf("\nTest 3 completed successfully.\n\n\n");

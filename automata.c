@@ -162,7 +162,7 @@ State* getPrevState(int n)
             break;
         }
     }
-    if(hitEnd == 1)
+    if(hitEnd == 1 && DEBUG)
         printf("Warning; hit beginning of states, returning null pointer");
     return t;
 }
@@ -203,7 +203,6 @@ List* getNFAStates(char symbol)
                         lastList = startList;
                         startList->next = (List*)NULL;
                         startList->prev = (List*)NULL;
-                        printf("Created start of list\n"); //DEBUG
                     }
                     if(currList == (List*)NULL)
                     {
@@ -211,17 +210,20 @@ List* getNFAStates(char symbol)
                         currList->prev = lastList;
                         currList->next = (List*)NULL;
                         lastList->next = currList;
-                        printf("Added element\n"); //DEBUG
+                        if(DEBUG)
+                            printf("getNFAStates(): adding state to list\n"); 
                     }
                     currList->state = move->to;
                     lastList = currList;
                     currList = currList->next;
                     move = move->next;
+                    ++count;
                 }
-                printf("symbol is: %c\n",rule->symbol); //DEBUG
             }
             rule = rule->next;
         }
+        if(DEBUG)
+            printf("Found %d states for symbol %c\n",count, symbol);
     }
     return startList;
 }
@@ -277,7 +279,8 @@ int setNFAStateRelation(char symbol, State* from, State* to)
                 {
                     if(s->to == to)
                     {
-                        printf("Move already exists\n");
+                        if(DEBUG) 
+                            printf("Move already exists\n");
                         return 0; //move already exists
                     }
                     lastMov = s;
