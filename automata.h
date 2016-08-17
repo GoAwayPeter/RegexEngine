@@ -60,7 +60,7 @@ State* getPrevState(int n);
 int setCurrState(State* s);
 State* getCurrState();
 /* 
- * Returns array of pointers to states reachable by symbol 
+ * Returns linked list of pointers to states reachable by symbol 
  */
 List* getNFAStates(char symbol);
 /* 

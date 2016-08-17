@@ -181,8 +181,10 @@ void freeNFAStates()
  */
 List* getNFAStates(char symbol)
 {
-    List* startList, *currList, *lastList;
-    Rule* rule;
+    List* startList = NULL, *currList = NULL, *lastList = NULL;
+    Rule* rule = NULL;
+    Move* move = NULL;
+    int count = 0;
 
     if(__automata_currNFAState->rool != NULL)
     {
@@ -191,21 +193,32 @@ List* getNFAStates(char symbol)
         {
             if(rule->symbol == symbol)
             {
-                if(startList == (List*)NULL)
+                move = rule->mov;
+                while(move != (Move*)NULL)
                 {
-                    startList = malloc(sizeof(List));
-                    currList = startList;
+                    if(startList == (List*)NULL)
+                    {
+                        startList = malloc(sizeof(List));
+                        currList = startList;
+                        lastList = startList;
+                        startList->next = (List*)NULL;
+                        startList->prev = (List*)NULL;
+                        printf("Created start of list\n"); //DEBUG
+                    }
+                    if(currList == (List*)NULL)
+                    {
+                        currList = malloc(sizeof(List));
+                        currList->prev = lastList;
+                        currList->next = (List*)NULL;
+                        lastList->next = currList;
+                        printf("Added element\n"); //DEBUG
+                    }
+                    currList->state = move->to;
+                    lastList = currList;
+                    currList = currList->next;
+                    move = move->next;
                 }
-                if(currList == (List*)NULL)
-                {
-                    currList = malloc(sizeof(List));
-                    currList->prev = lastList;
-                    currList->next = (List*)NULL;
-                    lastList->next = currList;
-                }
-                currList->state = rule->mov->to;
-                lastList = currList;
-                currList = currList->next;
+                printf("symbol is: %c\n",rule->symbol); //DEBUG
             }
             rule = rule->next;
         }

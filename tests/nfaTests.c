@@ -26,7 +26,7 @@ int main(int argc, char** argv)
         if(setCurrState(getNextState(1)) == -1)
             printf("set current state failed %d\n",i);
     }
-    printf("\nSuccess!\n\n\n");
+    printf("\nTest 1 completed successfully.\n\n\n");
 
     //Test 2 for setNFAStateRelation
     printf("Test2: Adding lots of different symbols to the same rule\n");
@@ -37,16 +37,20 @@ int main(int argc, char** argv)
     {
         setNFAStateRelation((currentChar + i) % 94 + 32, getCurrState(), getNextState(1));
     }
-    printf("\nSuccess!\n\n\n");
+    printf("\nTest 2 completed successfully.\n\n\n");
 
 
     List* startList = getNFAStates(currentChar);
     List* currList = startList;
+    Rule* arule;
+    State* astate;
+    Move* mov;
+
     while(currList != (List*)NULL)
     {
-        printf(" %c ",currList->state->rool->symbol);
+        printf(" %c ",currList->state->rool->symbol); //printing added symbols
         currList = currList->next;
     }
 
-    printf("\nSuccess!\n\n\n");
+    printf("\nTest 3 completed successfully.\n\n\n");
 }
