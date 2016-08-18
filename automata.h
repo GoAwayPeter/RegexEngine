@@ -3,7 +3,7 @@
 
 #define NUMSYMBOLS 128
 #define EPSILON 27
-#define DEBUG 1
+#define DEBUG 0
 
 /*
  * Globals
@@ -13,9 +13,7 @@ static struct State* __automata_currNFAState;
 static unsigned int __automata_statesAllocated;
 
 /* 
- * NFA data structure
- * - reuse this structure for DFA's?
- *   too flexible - will allow invalid DFA states
+ * Automata data structure
  */
 typedef struct Move{
     struct State* to;
@@ -23,7 +21,6 @@ typedef struct Move{
 } Move;
 
 typedef struct Rule{
-//    int (*rule)(char);  //TODO why was I going to do this?
     char symbol;
     struct Move* mov;
     struct Rule* next;
@@ -36,7 +33,7 @@ typedef struct State{
 } State;
 
 
-/* List of pointers to States */
+/* Linked list of pointers to States */
 
 typedef struct List{
     struct State* state;
@@ -44,22 +41,30 @@ typedef struct List{
     struct List* prev;
 } List;
 
-/*
- * NFA related functions
- */
+/************
+ * Functions!
+ ************/
 
+/*
+ * Initialisation function. Call before doing anything
+ */
 State* initNFAStates(int numStates);
-//State* advanceState(int n); //advances current state n times
 /*
  * Go forward n states
  */
-State* getNextState(int n);  
+State* getNextNFAState(int n);  
 /*
  * Go back n states
  */
-State* getPrevState(int n); 
-int setCurrState(State* s);
-State* getCurrState();
+State* getPrevNFAState(int n); 
+/*
+ * Sets the current state to the one specified
+ */
+int setCurrNFAState(State* s);
+/*
+ * Returns pointer to current state
+ */
+State* getCurrNFAState();
 /* 
  * Returns linked list of pointers to states reachable by symbol 
  */
@@ -68,11 +73,12 @@ List* getNFAStates(char symbol);
  * Sets NFA state relation
  */
 int setNFAStateRelation(char symbol, State* from, State* to);
+
 /* 
- * Returns linked list of States can move to from 'from' State on
- * symbol 
+ * Builds DFA state from current NFA. Ensure current state
+ * is set to the initial state of the NFA. Only call once the
+ * NFA is finished!
  */
-State* moveState(State* from, char symbol);
-void printStates();
+State* buildDFA();
 
 #endif

@@ -16,6 +16,11 @@
  *  <factor>    ::= '(' <regex> ')' | <chars>
  *  <chars>     ::= <chars><char> | '\'<chars><char> | <char>
  *  <char>      ::= 'a' | 'b' | 'c' | 'd' | ...
+ *
+ *
+ *  TODO 
+ *  fork project and rewrite such that multiple regular expressions
+ *  are compiled in separate threads.
  **/
 
 void chars();
@@ -37,10 +42,10 @@ void chars()
         else if(!isRepOp(getCurrChar()))
         {
             //handle normal char
-            if(setNFAStateRelation(getCurrChar(),getCurrState(),getNextState(1)) == -1)
+            if(setNFAStateRelation(getCurrChar(),getCurrNFAState(),getNextNFAState(1)) == -1)
                printf(" Error setting NFA state, currNFAState is %d \n",
-                                                    (int)getCurrState());
-            setCurrState(getNextState(2));
+                                                    (int)getCurrNFAState());
+            setCurrNFAState(getNextNFAState(2));
             getNextChar();
         }
         else
@@ -133,6 +138,5 @@ int main(int argc, char **argv)
     else 
         printf("Not enough arguments given\n");
 
-    printStates(10);
     return 0;
 }

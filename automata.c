@@ -1,31 +1,24 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "automata.h"
-/* 
- * TODO 
- * - optimisations
- * - nfa to dfa conversion
+/*
+ * TODO
+ * - optimisations (not really)
+ * - nfa to dfa conversion (important!)
  */
 
 /*
-* State table is a linked list of arrays of linked
-* lists.
-* This removes the need for a 3D array, which 
-* would be incredibly messy and horrible. Ew.
-*/
-
-/* 
- * Allocates memory for nfa states - this is called in 
+ * Allocates memory for nfa states - this is called in
  * the initialisation of the states, and if we request
  * the 'next' state, but it doesn't exist yet
  */
-State* allocNFAStates(int statesToAlloc)
+State* allocStates(int statesToAlloc)
 {   int i,j;
     State *this, *prev, *start;
     prev = (State*)NULL;
     for(i = 0;i < statesToAlloc;i++)
     {
-        this = malloc(sizeof(State));    
+        this = malloc(sizeof(State));
         if(i == 0)
             start = this;
         this->prev = prev;
@@ -42,14 +35,14 @@ State* allocNFAStates(int statesToAlloc)
  * Initialise the automata library
  */
 State* initNFAStates(int numStates)
-{   
+{
     __automata_currNFAState = (State*)NULL;
     if(numStates < 0)
     {
         printf("Error initialising NFA states: incorrect numstates arg\n");
         exit(1);
     }
-    __automata_currNFAState = allocNFAStates(numStates);
+    __automata_currNFAState = allocStates(numStates);
     __automata_statesAllocated = numStates;
     return __automata_currNFAState;
 }
@@ -57,56 +50,15 @@ State* initNFAStates(int numStates)
 /*
  * Returns a pointer to the current State
  */
-State* getCurrState()
+State* getCurrNFAState()
 {
     return __automata_currNFAState;
 }
 
 /*
- * TODO for debugging
- */
-void printStates(int num)
-{   int i,j;
-
-    State* currState = getCurrState();
-    State* prevState; 
-    printf("a");
-    while(currState != (State*)NULL)
-    {
-        setCurrState(currState);
-        prevState = currState;
-        currState = getPrevState(1);
-    }
-    //*currState = *prevState;
-
-    printf("c");
-    /*
-    for(i = 0;i < num;i++)
-    {
-        setCurrState(currState);
-        if(currState != NULL && currState->rool != NULL)
-        {
-            Rule* rule = currState->rool;
-            while(rule != (Rule*)NULL)
-            {
-                printf("%c, ", rule->symbol);
-                Move* mov = currState->rool->mov;
-                while(mov != (Move*)NULL)
-                {
-                    mov = mov->next; 
-                }
-                rule = rule->next;
-            }
-        }
-        currState = getNextState(1);
-    }
-    */
-}
-
-/*
  * Change the current state
  */
-int setCurrState(State* s)
+int setCurrNFAState(State* s)
 {
     if(s == (State*)NULL)
     {
@@ -117,10 +69,10 @@ int setCurrState(State* s)
     return 0;
 }
 
-/* 
+/*
  * Gets the next State from the current State
  */
-State* getNextState(int n)
+State* getNextNFAState(int n)
 {   int i;
     int hitEnd = 0;
     State* last;
@@ -136,7 +88,7 @@ State* getNextState(int n)
             }
             else
             {
-                next = allocNFAStates(2 * __automata_statesAllocated);
+                next = allocStates(2 * __automata_statesAllocated);
                 last->next = next;
                 next->prev = last;
             }
@@ -148,7 +100,7 @@ State* getNextState(int n)
 /*
  * Get the previous state from the current State
  */
-State* getPrevState(int n)
+State* getPrevNFAState(int n)
 {   int i;
     int hitEnd = 0;
     State* t = __automata_currNFAState;
@@ -232,14 +184,14 @@ List* getNFAStates(char symbol)
  * Sets a relation between 2 states
  */
 int setNFAStateRelation(char symbol, State* from, State* to)
-{   
-    if((( symbol < 127 && symbol >= 32) || symbol == EPSILON || symbol == '.') 
+{
+    if((( symbol < 127 && symbol >= 32) || symbol == EPSILON || symbol == '.')
             && from != NULL)
     {
         if(from->rool == (Rule*)NULL) //rule doesn't exist yet
         {
             from->rool = malloc(sizeof(Rule));
-            from->rool->symbol = symbol; 
+            from->rool->symbol = symbol;
             from->rool->mov = malloc(sizeof(Move));
             from->rool->mov->to = to;
             from->rool->mov->next = (Move*)NULL;
@@ -265,7 +217,7 @@ int setNFAStateRelation(char symbol, State* from, State* to)
             {
                 t = malloc(sizeof(Rule)); 
                 lastRule->next = t;
-                t->symbol = symbol; 
+                t->symbol = symbol;
                 t->mov = malloc(sizeof(Move));
                 t->mov->to = to;
                 t->mov->next = (Move*)NULL;
@@ -279,7 +231,7 @@ int setNFAStateRelation(char symbol, State* from, State* to)
                 {
                     if(s->to == to)
                     {
-                        if(DEBUG) 
+                        if(DEBUG)
                             printf("Move already exists\n");
                         return 0; //move already exists
                     }
@@ -289,11 +241,20 @@ int setNFAStateRelation(char symbol, State* from, State* to)
                 s = malloc(sizeof(Move));
                 s->to = to;
                 s->next = (Move*)NULL;
-                lastMov->next = s; 
+                lastMov->next = s;
             }
         }
         return 0;
     }
     printf("Setting NFA state failed. Invalid Character\n");
     return -1;
+}
+
+/* 
+ * Builds DFA from the complete NFA 
+ */
+State* buildDFA()
+{
+    State* state;
+    return state;
 }
