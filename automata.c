@@ -8,6 +8,7 @@
  */
 
 /*
+ * ## Internal function
  * Allocates memory for nfa states - this is called in
  * the initialisation of the states, and if we request
  * the 'next' state, but it doesn't exist yet
