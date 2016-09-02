@@ -8,7 +8,7 @@ int main(int argc, char** argv)
         printf("Failed to initialise NFA states\n");
 
     //Test 1 for setNFAStateRelation 
-    printf("Test1: adding 1 symbol to 94 consecutive states, should print all ascii chars\n");
+    printf("Test 1: adding 1 symbol to 94 consecutive states, should print all ascii chars\n");
 
     State* start = getCurrNFAState();
     int j;
@@ -33,7 +33,7 @@ int main(int argc, char** argv)
     setCurrNFAState(getPrevNFAState(40));
     printf("current char is %c\n", (char)getCurrNFAState()->rool->symbol);
     char currentChar = (char)getCurrNFAState()->rool->symbol;
-    for(i = 0;i < 94;i++) 
+    for(i = 0;i < 95;i++) 
     {
         setNFAStateRelation(((currentChar + i) % 94) + 32, getCurrNFAState(), getNextNFAState(1));
     }
@@ -52,14 +52,14 @@ int main(int argc, char** argv)
         printf("\n");
         list = list->next;
     }
-    printf("\nTest 2 completed successfully.\n\n\n");
+    printf("\nTest 2: completed successfully.\n\n");
 
     printf("\nTest 3: Adding lots of states to the same rule.\n\n");
 
     for(i = 0;i < 10000;i++) //works with 100,000 but is a bit slow
     {
-        setNFAStateRelation(currentChar , getCurrNFAState(), getNextNFAState(i));
+        setNFAStateRelation(currentChar, getCurrNFAState(), getNextNFAState(i));
     }
 
-    printf("\nTest 3 completed successfully.\n\n\n");
+    printf("\nTest 3 completed successfully.\n\n");
 }

@@ -38,7 +38,6 @@ typedef struct State{
 typedef struct List{
     struct State* state;
     struct List* next;
-    struct List* prev;
 } List;
 
 /************

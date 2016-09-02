@@ -253,7 +253,46 @@ int setNFAStateRelation(char symbol, State* from, State* to)
 
 /* 
  * Builds DFA from the complete NFA 
+ *
+ *
+ * Allocate new set of states //necessary?
+ * epsilon closure
+ * then step through converting 
  */
+
+/*
+ * Returns the states moveable to from current state(s) on given
+ * symbol
+ */
+List* move(char symbol)
+{
+    List* start = malloc(sizeof(List));         
+    List* list = start;
+    State* currState = __automata_currNFAState;
+    Rule* rool = currState->rool;
+    while(rool != NULL)
+    {
+        if(rool->symbol == symbol)
+        {
+            Move* mov = rool->mov;
+            while(mov != NULL)
+            {
+                list->state = mov->to; 
+                list->next = malloc(sizeof(List));
+                list = list->next;
+                mov = mov->next;
+            }
+        }
+    }
+    //If no states found, return null
+    if(start->state == NULL)
+    {
+        free(start);
+        start = NULL;
+    }
+    return start;
+}
+
 State* buildDFA()
 {
     State* state;
