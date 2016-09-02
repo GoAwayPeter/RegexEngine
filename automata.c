@@ -129,7 +129,7 @@ void freeNFAStates()
 }
 
 /* 
- * Returns array of pointers to states reachable by symbol 
+ * Returns linked list of pointers to states reachable by symbol 
  * from the current State
  */
 List* getNFAStates(char symbol)

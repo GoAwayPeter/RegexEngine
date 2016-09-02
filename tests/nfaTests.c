@@ -62,4 +62,17 @@ int main(int argc, char** argv)
     }
 
     printf("\nTest 3 completed successfully.\n\n");
+
+    printf("\nTest 4: Getting NFA States\n\n");
+    List* s = getNFAStates(currentChar);
+    int o = 0;
+    while(s != NULL)
+    {
+        o++;
+        s = s->next;
+    }
+    if(o == 10000)
+        printf("\nTest 4 completled successfully\n\n");
+    else
+        printf("\n Test 4 failed, %d states found\n\n", o);
 }
