@@ -266,7 +266,7 @@ int setNFAStateRelation(char symbol, State* from, State* to)
  */
 List* move(char symbol)
 {
-    List* start = malloc(sizeof(List));         
+    List* start = malloc(sizeof(List));
     List* list = start;
     State* currState = __automata_currNFAState;
     Rule* rool = currState->rool;
@@ -277,7 +277,7 @@ List* move(char symbol)
             Move* mov = rool->mov;
             while(mov != NULL)
             {
-                list->state = mov->to; 
+                list->state = mov->to;
                 list->next = malloc(sizeof(List));
                 list = list->next;
                 mov = mov->next;
