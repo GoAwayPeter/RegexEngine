@@ -3,7 +3,7 @@
 
 #define NUMSYMBOLS 128
 #define EPSILON 27
-#define DEBUG 0
+#define DEBUG 1
 
 /*
  * Globals
@@ -72,7 +72,7 @@ List* getNFAStates(char symbol);
 /* 
  * Sets NFA state relation
  */
-int setNFAStateRelation(char symbol, State* from, State* to);
+int setNFAStateRelation(char symbol, State* to);
 
 /* 
  * Builds DFA state from current NFA. Ensure current state

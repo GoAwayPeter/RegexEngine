@@ -14,7 +14,7 @@
  * the 'next' state, but it doesn't exist yet
  */
 State* allocStates(int statesToAlloc)
-{   int i,j;
+{ /*  int i,j; //this took 13.13s to run tests with last test creating 10000 states
     State *this, *prev, *start;
     prev = (State*)NULL;
     for(i = 0;i < statesToAlloc;i++)
@@ -29,6 +29,20 @@ State* allocStates(int statesToAlloc)
         this->rool = (Rule*)NULL;
     }
     this->next = (State*)NULL;
+    return start;
+    */
+    int i; //hopefully this will run more quickly
+    State *this, *prev, *start;
+    prev = (State*)NULL;
+    this = malloc(statesToAlloc * sizeof(State));
+    start = this;
+    for(i = 0;i < statesToAlloc;i++)
+    {
+        this->next = this + sizeof(State);
+        this->prev = prev;
+        prev = this;
+        this = this->next;
+    }
     return start;
 }
 
@@ -77,25 +91,31 @@ State* getNextNFAState(int n)
 {   int i;
     int hitEnd = 0;
     State* last;
-    State* next = __automata_currNFAState;
+    State* state = __automata_currNFAState;
     if(n > 0)
     {
         for(i = 0;i < n;i++)
         {
-            if(next != (State*)NULL)
+            if(state != (State*)NULL)
             {
-                last = next;
-                next = next->next;
+                last = state;
+                state = state->next;
+                printf("%d",i);
+                if(state == NULL)
+                    printf("errroiej %d",i);
             }
             else
             {
-                next = allocStates(2 * __automata_statesAllocated);
-                last->next = next;
-                next->prev = last;
+                if(DEBUG)
+                    printf("\nAllocating more NFA states\n");
+                __automata_statesAllocated = 2 * __automata_statesAllocated;
+                state = allocStates(2 * __automata_statesAllocated);
+                last->next = state;
+                state->prev = last;
             }
         }
     }
-    return next;
+    return state;
 }
 
 /*
@@ -182,12 +202,23 @@ List* getNFAStates(char symbol)
 }
 
 /*
- * Sets a relation between 2 states
+ * Sets a relation between 2 states, from current state
  */
-int setNFAStateRelation(char symbol, State* from, State* to)
+int setNFAStateRelation(char symbol, State* to)
 {
-    if((( symbol < 127 && symbol >= 32) || symbol == EPSILON || symbol == '.')
-            && from != NULL)
+    State* from = __automata_currNFAState;
+    if(from == NULL || to == NULL)
+    {
+        if(DEBUG)
+        {
+            if(from == NULL)
+                printf("Error: 'from' state is NULL!\n");
+            if(to == NULL)
+                printf("Error: 'to' state is NULL!\n");
+        }
+        return -1;
+    }
+    if(( symbol < 127 && symbol >= 32) || symbol == EPSILON || symbol == '.')
     {
         if(from->rool == (Rule*)NULL) //rule doesn't exist yet
         {
@@ -247,8 +278,8 @@ int setNFAStateRelation(char symbol, State* from, State* to)
         }
         return 0;
     }
-    printf("Setting NFA state failed. Invalid Character\n");
-    return -1;
+    printf("Error: setting NFA state failed. Invalid Character\n");
+    return -1; 
 }
 
 /* 
