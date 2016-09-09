@@ -31,7 +31,7 @@ State* allocStates(int statesToAlloc)
     this->next = (State*)NULL;
     return start;
     */
-    int i; //hopefully this will run more quickly
+    int i; //hopefully this will run more quickly, if it ever works
     State *this, *prev, *start;
     prev = (State*)NULL;
     this = malloc(statesToAlloc * sizeof(State));
@@ -39,6 +39,7 @@ State* allocStates(int statesToAlloc)
     for(i = 0;i < statesToAlloc;i++)
     {
         this->next = this + sizeof(State);
+        int size = sizeof(State);
         this->prev = prev;
         prev = this;
         this = this->next;

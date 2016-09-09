@@ -42,7 +42,7 @@ void chars()
         else if(!isRepOp(getCurrChar()))
         {
             //handle normal char
-            if(setNFAStateRelation(getCurrChar(),getCurrNFAState(),getNextNFAState(1)) == -1)
+            if(setNFAStateRelation(getCurrChar(), getNextNFAState(1)) == -1)
                printf(" Error setting NFA state, currNFAState is %d \n",
                                                     (int)getCurrNFAState());
             setCurrNFAState(getNextNFAState(2));

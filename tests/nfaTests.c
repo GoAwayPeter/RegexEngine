@@ -9,17 +9,21 @@ int main(int argc, char** argv)
 
     int x = 0;
     State* state = getCurrNFAState();
-    while(state->next != NULL)
+    while(state != NULL)
     {
         state = state->next;
         x++;
-        printf("%d",x);
+        printf("%0x ",state);
     }
-    while(state->prev != NULL)
+    /*
+    State* state1 = getCurrNFAState();
+    while(state1 != NULL)
     {
-        state = state->prev;
+        state1 = state1->prev;
         x++;
+        printf("%0x",state1);
     }
+    */
     if(x != 256)
         printf("States are not linked properly! %d\n",x);
 
