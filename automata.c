@@ -14,7 +14,7 @@
  * the 'next' state, but it doesn't exist yet
  */
 State* allocStates(int statesToAlloc)
-{ /*  int i,j; //this took 13.13s to run tests with last test creating 10000 states
+{   int i; //this took 13.13s to run tests with last test creating 10000 states
     State *this, *prev, *start;
     prev = (State*)NULL;
     for(i = 0;i < statesToAlloc;i++)
@@ -30,8 +30,10 @@ State* allocStates(int statesToAlloc)
     }
     this->next = (State*)NULL;
     return start;
-    */
-    int i; //hopefully this will run more quickly, if it ever works
+    /*  /// THIS BREAKS EVERYTHING ////
+     *  TODO: make this work.
+     *
+    int i; 
     State *this, *prev, *start;
     prev = (State*)NULL;
     this = malloc(statesToAlloc * sizeof(State));
@@ -39,12 +41,14 @@ State* allocStates(int statesToAlloc)
     for(i = 0;i < statesToAlloc;i++)
     {
         this->next = this + sizeof(State);
-        int size = sizeof(State);
         this->prev = prev;
         prev = this;
         this = this->next;
     }
+    this->next = (State*)NULL;
+    this->prev = prev;
     return start;
+    */
 }
 
 /*
@@ -53,13 +57,13 @@ State* allocStates(int statesToAlloc)
 State* initNFAStates(int numStates)
 {
     __automata_currNFAState = (State*)NULL;
-    if(numStates < 0)
-    {
-        printf("Error initialising NFA states: incorrect numstates arg\n");
-        exit(1);
-    }
     __automata_currNFAState = allocStates(numStates);
     __automata_statesAllocated = numStates;
+    if(getCurrNFAState() == (State*)-1) 
+    {
+        printf("Error initialising NFA states\n");
+        exit(1);
+    }
     return __automata_currNFAState;
 }
 
@@ -97,22 +101,18 @@ State* getNextNFAState(int n)
     {
         for(i = 0;i < n;i++)
         {
-            if(state != (State*)NULL)
+            if(state->next != (State*)NULL)
             {
                 last = state;
                 state = state->next;
-                printf("%d",i);
-                if(state == NULL)
-                    printf("errroiej %d",i);
             }
             else
             {
                 if(DEBUG)
                     printf("\nAllocating more NFA states\n");
                 __automata_statesAllocated = 2 * __automata_statesAllocated;
-                state = allocStates(2 * __automata_statesAllocated);
-                last->next = state;
-                state->prev = last;
+                state->next = allocStates(2 * __automata_statesAllocated);
+                state->next->prev = state->next;
             }
         }
     }
@@ -184,14 +184,12 @@ List* getNFAStates(char symbol)
                         currList->prev = lastList;
                         currList->next = (List*)NULL;
                         lastList->next = currList;
-                        if(DEBUG)
-                            printf("getNFAStates(): adding state to list\n"); 
                     }
                     currList->state = move->to;
                     lastList = currList;
                     currList = currList->next;
-                    move = move->next;
                     ++count;
+                    move = move->next;
                 }
             }
             rule = rule->next;
@@ -236,6 +234,7 @@ int setNFAStateRelation(char symbol, State* to)
             int found = 0;
             Rule* lastRule;
             Rule* t = from->rool;
+            int count = 0;
             while(t != (Rule*)NULL)
             {
                 if(t->symbol == symbol)
@@ -244,6 +243,7 @@ int setNFAStateRelation(char symbol, State* to)
                     break;
                 }
                 lastRule = t;
+                count++;
                 t = t->next;
             }
             if(found == 0) //symbol is not in Rule list, add it
@@ -266,7 +266,7 @@ int setNFAStateRelation(char symbol, State* to)
                     {
                         if(DEBUG)
                             printf("Move already exists\n");
-                        return 0; //move already exists
+                        return -1; //move already exists
                     }
                     lastMov = s;
                     s = s->next;
