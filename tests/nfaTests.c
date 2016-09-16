@@ -4,18 +4,19 @@
 int main(int argc, char** argv)
 {   int i;
     //test init func
-    if(initNFAStates(128) == (State*)NULL)
+    Params* params = initNFAStates(128);
+    if(params->currentState == (State*)NULL)
         printf("Failed to initialise NFA states\n");
 
     printf("Test 0: Are states properly linked?\n");
     int x = 0;
-    State* state = getCurrNFAState();
+    State* state = params->currentState;
     int testStates = 127;
     for(i = 0;i < testStates;i++)
     {
         state = state->next;
         x++;
-//        printf("%d ",x);  //segfaults if this is here.
+//        printf("%d ",x);  //weird behaviour seen with this with alternative allocation scheme
     }
     if(state == NULL)
         printf("oh no! We've got to a NULL state\n\n");
@@ -40,37 +41,37 @@ int main(int argc, char** argv)
     //Test 1 for setNFAStateRelation 
     printf("Test 1: adding 1 symbol to 94 consecutive states, should print all ascii chars\n");
 
-    State* start = getCurrNFAState();
+    State* start = params->currentState;
     int j;
     for(j = 32;j < 128;j++)
     {
-        setNFAStateRelation((char)j, getNextNFAState(1)); 
-        if(setCurrNFAState(getNextNFAState(1)) == -1)
+        setNFAStateRelation((char)j, getNextNFAState(1, params), params); 
+        if((params->currentState = getNextNFAState(1, params)) == (State*)NULL)
             printf("set current state failed %d\n",j);
     }
-    setCurrNFAState(start);
+    params->currentState = start;
     for(i = 32;i < 127;i++)
     {
-        if(getCurrNFAState()->rool != (Rule*)NULL)
-            printf("%c", (char)getCurrNFAState()->rool->symbol);
-        if(setCurrNFAState(getNextNFAState(1)) == -1)
+        if(params->currentState->rool != (Rule*)NULL)
+            printf("%c", (char)params->currentState->rool->symbol);
+        if((params->currentState = getNextNFAState(1, params)) == (State*)NULL)
             printf("set current state failed %d\n",i);
     }
     printf("\nTest 1 completed successfully.\n\n\n");
 
     //Test 2 for setNFAStateRelation
     printf("Test 2: Adding lots of different symbols to the same rule\n");
-    setCurrNFAState(getPrevNFAState(40));
-    printf("current char is %c\n", (char)getCurrNFAState()->rool->symbol);
-    char currentChar = (char)getCurrNFAState()->rool->symbol;
+    params->currentState = getPrevNFAState(40, params);
+    printf("current char is %c\n", (char)params->currentState->rool->symbol);
+    char currentChar = (char)params->currentState->rool->symbol;
     for(i = 0;i < 95;i++) 
     {
-        setNFAStateRelation(((currentChar + i) % 94) + 32, getNextNFAState(1));
+        setNFAStateRelation(((currentChar + i) % 94) + 32, getNextNFAState(1, params), params);
     }
 
     List* list;
     for(i = 0;i < 94;i++) 
-        list = getNFAStates((currentChar + i) % 94 + 32);
+        list = getNFAStates((currentChar + i) % 94 + 32, params);
     while(list != (List*)NULL)
     {
         Rule* ruleptr = list->state->prev->rool;
@@ -88,36 +89,30 @@ int main(int argc, char** argv)
     State* nextState;
     State* lastState;
     int numFailedSetState = 0;
-    for(i = 2;i < 10000;i++) //works with 100,000 but is a bit slow
+    int stateToSet = 74;
+    int startFrom = 0;
+    Params params_copy;
+    params_copy.currentState = params->currentState;
+    for(i = startFrom;i < stateToSet;i++) 
     {
-        if(setNFAStateRelation(currentChar + 1, getNextNFAState(i)) == -1)
+        printf("%0x ",params_copy.currentState->next);
+        if(setNFAStateRelation(currentChar + 1, getNextNFAState(1, &params_copy), params) == -1)
             numFailedSetState++;
+        params_copy.currentState = params_copy.currentState->next;
 
-        List* s = getNFAStates(currentChar + 1);
-        int o = 0;
-        while(s != NULL)
-        {
-            o++;
-            s = s->next;
-        }
-        if(o + numFailedSetState != i)
-        {
-            printf("Warning, o and i not equal! o= %d, i= %d\n",o,i);
-            printf("numFailedSetState %d\n",numFailedSetState);
-            return 0;
-        }
+        List* s = getNFAStates(currentChar + 1, params);
     }
 
     printf("\nTest 4: Getting NFA States\n");
-    List* s = getNFAStates(currentChar + 1);
+    List* s = getNFAStates(currentChar + 1, params);
     int o = 0;
     while(s->next != NULL)
     {
         o++;
         s = s->next;
     }
-    if(o == 9998 - numFailedSetState)
+    if(o == stateToSet - startFrom - numFailedSetState)
         printf("\nTests 3 & 4 completed successfully\n\n");
     else
-        printf("\n Test 3 or 4 failed, %d states found, %d states set\n\n", o, 9998 - numFailedSetState);
+        printf("\n Test 3 or 4 failed, %d states found, %d states set\n\n", o, stateToSet - startFrom - numFailedSetState);
 }

@@ -111,7 +111,7 @@ int main(int argc, char **argv)
 {   int i;
     clock_t begin, end;
     double timeTaken;
-    initNFAStates(128);
+    Params* params = initNFAStates(128);
 
     if(getChars(argc,argv) != NULL)
     {

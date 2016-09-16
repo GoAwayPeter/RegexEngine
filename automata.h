@@ -5,13 +5,6 @@
 #define EPSILON 27
 #define DEBUG 0
 
-/*
- * Globals
- */
-struct State;
-static struct State* __automata_currNFAState;
-static unsigned int __automata_statesAllocated;
-
 /* 
  * Automata data structure
  */
@@ -30,6 +23,7 @@ typedef struct State{
     struct Rule* rool;
     struct State* next;
     struct State* prev;
+    int finishing;
 } State;
 
 
@@ -41,6 +35,14 @@ typedef struct List{
     struct List* prev;
 } List;
 
+/* Struct to pass to functions */
+typedef struct Params{
+    State* currentState;
+    State* firstState;
+    int statesAllocated;
+    State* returned;
+} Params;
+
 /************
  * Functions!
  ************/
@@ -48,37 +50,29 @@ typedef struct List{
 /*
  * Initialisation function. Call before doing anything
  */
-State* initNFAStates(int numStates);
+Params* initNFAStates(int numStates);
 /*
  * Go forward n states
  */
-State* getNextNFAState(int n);  
+State* getNextNFAState(int n, Params* params);  
 /*
  * Go back n states
  */
-State* getPrevNFAState(int n); 
-/*
- * Sets the current state to the one specified
- */
-int setCurrNFAState(State* s);
-/*
- * Returns pointer to current state
- */
-State* getCurrNFAState();
+State* getPrevNFAState(int n, Params* params); 
 /* 
  * Returns linked list of pointers to states reachable by symbol 
  */
-List* getNFAStates(char symbol);
+List* getNFAStates(char symbol, Params* params);
 /* 
  * Sets NFA state relation
  */
-int setNFAStateRelation(char symbol, State* to);
+int setNFAStateRelation(char symbol, State* to, Params* params);
 
 /* 
  * Builds DFA state from current NFA. Ensure current state
  * is set to the initial state of the NFA. Only call once the
  * NFA is finished!
  */
-State* buildDFA();
+List* buildDFA(Params* params);
 
 #endif

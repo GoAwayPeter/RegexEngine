@@ -4,6 +4,7 @@
 /*
  * TODO
  * - optimisations (not really)
+ *   - fix commented allocStates() function
  * - nfa to dfa conversion (important!)
  */
 
@@ -14,7 +15,7 @@
  * the 'next' state, but it doesn't exist yet
  */
 State* allocStates(int statesToAlloc)
-{   int i; //this took 13.13s to run tests with last test creating 10000 states
+{   int i; //this took 4.4s to run tests with last test creating 10000 states
     State *this, *prev, *start;
     prev = (State*)NULL;
     for(i = 0;i < statesToAlloc;i++)
@@ -54,49 +55,28 @@ State* allocStates(int statesToAlloc)
 /*
  * Initialise the automata library
  */
-State* initNFAStates(int numStates)
+Params* initNFAStates(int numStates)
 {
-    __automata_currNFAState = (State*)NULL;
-    __automata_currNFAState = allocStates(numStates);
-    __automata_statesAllocated = numStates;
-    if(getCurrNFAState() == (State*)-1) 
+    Params* params = malloc(sizeof(Params));
+    params->currentState = allocStates(numStates);
+    params->firstState   = params->currentState;
+    params->statesAllocated = numStates;
+    if(params->currentState == (State*)-1) 
     {
         printf("Error initialising NFA states\n");
         exit(1);
     }
-    return __automata_currNFAState;
-}
-
-/*
- * Returns a pointer to the current State
- */
-State* getCurrNFAState()
-{
-    return __automata_currNFAState;
-}
-
-/*
- * Change the current state
- */
-int setCurrNFAState(State* s)
-{
-    if(s == (State*)NULL)
-    {
-        printf("Error setting current state, arg passed is null\n");
-        exit(1);
-    }
-    __automata_currNFAState = s;
-    return 0;
+    return params;
 }
 
 /*
  * Gets the next State from the current State
  */
-State* getNextNFAState(int n)
+State* getNextNFAState(int n, Params* params)
 {   int i;
     int hitEnd = 0;
     State* last;
-    State* state = __automata_currNFAState;
+    State* state = params->currentState;
     if(n > 0)
     {
         for(i = 0;i < n;i++)
@@ -110,8 +90,8 @@ State* getNextNFAState(int n)
             {
                 if(DEBUG)
                     printf("\nAllocating more NFA states\n");
-                __automata_statesAllocated = 2 * __automata_statesAllocated;
-                state->next = allocStates(2 * __automata_statesAllocated);
+                params->statesAllocated = 2 * params->statesAllocated;
+                state->next = allocStates(2 * params->statesAllocated);
                 state->next->prev = state->next;
             }
         }
@@ -122,10 +102,10 @@ State* getNextNFAState(int n)
 /*
  * Get the previous state from the current State
  */
-State* getPrevNFAState(int n)
+State* getPrevNFAState(int n, Params* params)
 {   int i;
     int hitEnd = 0;
-    State* t = __automata_currNFAState;
+    State* t = params->currentState;
     for(i = 0;i < n;i++)
     {
         if(t != NULL)
@@ -149,20 +129,38 @@ void freeNFAStates()
     int i,j;
 }
 
+/*
+ * Returns 1 if state has move on symbol, 0 if not
+ */
+int hasMove(State* state, char symbol)
+{
+    if(state == NULL)
+        return -1;
+    Rule* rule = state->rool;
+    while(rule != NULL)
+    {
+        if(rule->symbol == symbol)
+            return 1;
+        rule = rule->next;
+    }
+    return 0;
+}
+
 /* 
  * Returns linked list of pointers to states reachable by symbol 
  * from the current State
+ * TODO does not take into account epsilon moves after symbol
  */
-List* getNFAStates(char symbol)
+List* getNFAStates(char symbol, Params* params)
 {
     List* startList = NULL, *currList = NULL, *lastList = NULL;
     Rule* rule = NULL;
     Move* move = NULL;
     int count = 0;
 
-    if(__automata_currNFAState->rool != NULL)
+    if(params->currentState->rool != NULL)
     {
-        rule = __automata_currNFAState->rool;
+        rule = params->currentState->rool;
         while(rule != (Rule*)NULL) 
         {
             if(rule->symbol == symbol)
@@ -197,15 +195,23 @@ List* getNFAStates(char symbol)
         if(DEBUG)
             printf("Found %d states for symbol %c\n",count, symbol);
     }
+    // Recursively call this function to get all EPSILON moves
+    if(hasMove(params->currentState->next,EPSILON))
+    {
+        Params params_copy;
+        params_copy.currentState = params->currentState->next;
+        currList->next = getNFAStates(EPSILON, &params_copy);
+    }
     return startList;
 }
 
 /*
  * Sets a relation between 2 states, from current state
+ * returns 0 on success, -1 on failure
  */
-int setNFAStateRelation(char symbol, State* to)
+int setNFAStateRelation(char symbol, State* to, Params* params)
 {
-    State* from = __automata_currNFAState;
+    State* from = params->currentState;
     if(from == NULL || to == NULL)
     {
         if(DEBUG)
@@ -291,9 +297,25 @@ int setNFAStateRelation(char symbol, State* to)
  * epsilon closure
  * then step through converting 
  */
-
-State* buildDFA()
+List* buildDFA(Params* params)
 {
-    State* state;
-    return state;
+    List* startStateList = malloc(sizeof(List));
+    List* currStateList = startStateList;
+    currStateList->state = params->firstState;
+    Rule* currRool = currStateList->state->rool;
+    while(currStateList != NULL)
+    {
+        while(currRool != NULL)
+        {
+             if(currRool->next != NULL)
+                 currRool = currRool->next;
+             else
+                 break;
+        }
+        if(currStateList->next != NULL)
+            currStateList = currStateList->next;
+        else 
+            break;
+    }
+    return currStateList;
 }
